@@ -1,0 +1,7 @@
+click==8.3.1
+coloredlogs==15.0.1
+cyvcf2==0.32.1
+humanfriendly==10.0
+numpy==2.4.2
+packaging==25.0
+scipy==1.17.1
