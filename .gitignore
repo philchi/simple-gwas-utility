@@ -2,3 +2,4 @@ data/1000G_chr1_pruned.vcf.gz
 .vscode
 .DS_Store
 test_space.ipynb
+__pycache__

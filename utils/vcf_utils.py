@@ -31,7 +31,7 @@ def get_phenotype(vcf, phen):
             continue
 
         cols = row.split("\t")
-        sampleMap[cols[0]] = cols[2]
+        sampleMap[cols[0]] = np.float64(cols[2])
 
     samples = vcf.samples
     phenotype = np.expand_dims(np.array([sampleMap.get(sample, 0) for sample in samples]), axis=1)
