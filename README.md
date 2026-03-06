@@ -14,6 +14,10 @@ against plink to compare their computational efficiency, memory usage, and accur
 > Note: Windows users may need to set up the environment in WSL to avoid errors when installing package cyvcf2
 2. Install the required packages with `pip install -r requirements.txt`
 3. Run the utility with `python gwas.py`
+- `--vcf` flag
+  - path to the vcf file
+- `--pheno` flag
+  - path to the phenotype file
 
 ## Next Steps
 
