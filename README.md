@@ -11,6 +11,8 @@ against plink to compare their computational efficiency, memory usage, and accur
 ## Installation Steps
 
 1. Create a Python environment with version `>= 3.11` (older versions may work, but not guaranteed)
+    - Run `python -m venv <env-name>` to make a standard python venv
+    - Run `conda create --name <env-name> python=3.11` if using Conda
 > Note: Windows users may need to set up the environment in WSL to avoid errors when installing package cyvcf2
 2. Install the required packages with `pip install -r requirements.txt`
 3. Run the utility with `python gwas.py`
@@ -22,6 +24,9 @@ against plink to compare their computational efficiency, memory usage, and accur
 ## Next Steps
 
 0. Complete GWAS utility basic functionality
+    - The main component is currently still incomplete
+    - Running `gwas.py` currently only gives the p value and effect size of the first snp in the dataset
+    - The output has not been verified either
 1. Verify GWAS utility's result with plink's result
 2. Optimize GWAS utility's efficiency by vectorizing the loop over SNPs
 3. Implement additional advanced features, such as MAF filtering, missingness filtering, assigning principal components as covariates, etc.
