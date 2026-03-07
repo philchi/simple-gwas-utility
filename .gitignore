@@ -1,4 +1,7 @@
 data/1000G_chr1_pruned.vcf.gz
+data/gwas_large.vcf.gz
+gwas.vcf.gz
+output
 .vscode
 .DS_Store
 test_space.ipynb

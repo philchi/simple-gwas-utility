@@ -19,8 +19,8 @@ def run_gwas(genotypes, phenotype, covars=None):
 
     coeffs, residuals, rank, _ = np.linalg.lstsq(X, y)
 
-    effectSize = coeffs[0]
-    dof = y.shape[0] - rank - 1
+    effectSize = coeffs[1]
+    dof = y.shape[0] - rank
 
     mse = residuals[0] / dof
     effectSizeVar = mse * (np.linalg.inv(X.T @ X)[1,1])
@@ -29,7 +29,7 @@ def run_gwas(genotypes, phenotype, covars=None):
     tStat = effectSize / coeffStdErr
     pVal = stats.t.sf(np.abs(tStat), dof) * 2
 
-    return effectSize, pVal
+    return effectSize, tStat, pVal
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -73,8 +73,14 @@ def main():
     genotypes = get_genotypes(vcf)
     phenotype = get_phenotype(vcf, phenName)
 
-    effectSize, pVal = run_gwas(genotypes=genotypes[:, 0:1], phenotype=phenotype[:, 0:1])
-    print(effectSize, pVal)
+    vcf.close()
+
+    index = 0
+    for _ in range(3):
+        effectSize, tStat, pVal = run_gwas(genotypes=genotypes[:, index:index+1], phenotype=phenotype[:, 0:1])
+        print(f"effect size: {effectSize}, t-stat: {tStat}, p value: {pVal}")
+        index += 1
+    
 
 if __name__ == "__main__":
     main()

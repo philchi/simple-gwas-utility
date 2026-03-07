@@ -8,7 +8,7 @@ def get_genotypes(vcf):
     genotypeStack = []
     
     try:
-        for variant in vcf:
+        for _, variant in enumerate(vcf):
             vcfGenotypes = variant.genotypes
             summedGenotypes = [genotype[0] + genotype[1] for genotype in vcfGenotypes]
             genotypeStack.append(summedGenotypes)
