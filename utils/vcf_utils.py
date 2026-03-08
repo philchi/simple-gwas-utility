@@ -1,17 +1,21 @@
 from cyvcf2 import VCF
+from tqdm import tqdm
 import numpy as np
 
-def read_vcf(vcfName):
+def read_vcf(vcfName: str):
     return VCF(vcfName)
 
 def get_genotypes(vcf):
     genotypeStack = []
     
     try:
-        for _, variant in enumerate(vcf):
+        print("Loading genotypes")
+        for variant in tqdm(vcf):
             vcfGenotypes = variant.genotypes
             summedGenotypes = [genotype[0] + genotype[1] for genotype in vcfGenotypes]
             genotypeStack.append(summedGenotypes)
+        
+        print("Done")
     except:
         pass
 
@@ -19,7 +23,7 @@ def get_genotypes(vcf):
 
     return genotypes
 
-def get_phenotype(vcf, phen):
+def get_phenotype(vcf, phen: str):
     with open(phen, "r") as f:
         data = f.read()
 
@@ -37,6 +41,22 @@ def get_phenotype(vcf, phen):
     phenotype = np.expand_dims(np.array([sampleMap.get(sample, 0) for sample in samples]), axis=1)
 
     return phenotype
+
+def get_covars(vcf, eigenvecName: str):
+    sampleMap = {}
+    with open(eigenvecName, "r") as f:
+        for line in f:
+            vals = line.split(" ")
+
+            sampleName = vals[0]
+            covar = vals[2:5]
+
+            sampleMap[sampleName] = covar
+
+    samples = vcf.samples
+    covars = np.array([sampleMap.get(sample, 0) for sample in samples], dtype=np.float64)
+
+    return covars
 
 if __name__ == "__main__":
     vcf = read_vcf("data/gwas.vcf")

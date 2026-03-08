@@ -1,8 +1,10 @@
 import argparse
+import os
 import numpy as np
 from cyvcf2 import VCF
+from tqdm import tqdm
 from scipy import stats
-from utils.vcf_utils import read_vcf, get_genotypes, get_phenotype
+from utils.vcf_utils import read_vcf, get_genotypes, get_phenotype, get_covars
 
 def run_gwas(genotypes, phenotype, covars=None):
     """
@@ -10,7 +12,7 @@ def run_gwas(genotypes, phenotype, covars=None):
     phenotype: (num samples x 1)
     covars: (num samples x num covars)
     """
-    if covars:
+    if covars is not None:
         X = np.column_stack((np.ones(genotypes.shape), genotypes, covars))
     else:
         X = np.column_stack((np.ones(genotypes.shape), genotypes))
@@ -18,6 +20,9 @@ def run_gwas(genotypes, phenotype, covars=None):
     y = phenotype
 
     coeffs, residuals, rank, _ = np.linalg.lstsq(X, y)
+
+    if residuals.size == 0:
+        return np.nan, np.nan, np.nan
 
     effectSize = coeffs[1]
     dof = y.shape[0] - rank
@@ -54,8 +59,22 @@ def parse_arguments():
     io_group.add_argument(
         "--out",
         type=str,
-        default="pygwas_results",
+        default="gwas_out",
         help="Prefix for the output results files"
+    )
+
+    processing_group = parser.add_argument_group("Processing/Filtering Options")
+
+    processing_group.add_argument(
+        "--covar",
+        type=str,
+        help="Path to plink eigenvec file from pca"
+    )
+
+    processing_group.add_argument(
+        "--maf",
+        type=str,
+        help="MAF threshold for filtering rare variants"
     )
 
     args = parser.parse_args()
@@ -65,21 +84,31 @@ def parse_arguments():
 def main():
     args = parse_arguments()
     
+    # load io args
     vcfName = args.vcf
     phenName = args.pheno
+    outName = args.out
+
+    # load processing args
+    covarName = args.covar
+    maf = args.maf
 
     vcf = read_vcf(vcfName)
 
     genotypes = get_genotypes(vcf)
     phenotype = get_phenotype(vcf, phenName)
+    covars = get_covars(vcf, covarName) if covarName else None
 
     vcf.close()
 
-    index = 0
-    for _ in range(3):
-        effectSize, tStat, pVal = run_gwas(genotypes=genotypes[:, index:index+1], phenotype=phenotype[:, 0:1])
-        print(f"effect size: {effectSize}, t-stat: {tStat}, p value: {pVal}")
-        index += 1
+    os.makedirs("output", exist_ok=True)
+
+    with open(f"output/{outName}", "w+") as f:
+        index = 0
+        for _ in tqdm(range(genotypes.shape[1])):
+            effectSize, tStat, pVal = run_gwas(genotypes[:, index:index+1], phenotype[:, 0:1], covars)
+            f.write(f"effect size: {effectSize}, t-stat: {tStat}, p value: {pVal}\n")
+            index += 1
     
 
 if __name__ == "__main__":
