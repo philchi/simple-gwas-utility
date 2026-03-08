@@ -7,7 +7,7 @@ def read_vcf(vcfName: str):
 
 def get_genotypes(vcf, mafHighPass):
     genotypeStack = []
-    ids = []
+    headers = []
     
     try:
         print("Loading genotypes")
@@ -19,7 +19,7 @@ def get_genotypes(vcf, mafHighPass):
 
             if maf >= mafHighPass:
                 genotypeStack.append(summedGenotypes)
-                ids.append(variant.ID)
+                headers.append([variant.CHROM, variant.ID, variant.POS])
         
         print("Done")
     except:
@@ -27,7 +27,7 @@ def get_genotypes(vcf, mafHighPass):
 
     genotypes = np.array(genotypeStack).T
 
-    return genotypes, ids
+    return genotypes, headers
 
 def get_phenotype(vcf, phen: str):
     with open(phen, "r") as f:

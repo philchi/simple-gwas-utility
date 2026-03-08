@@ -6,7 +6,7 @@ from tqdm import tqdm
 from scipy import stats
 from utils.vcf_utils import read_vcf, get_genotypes, get_phenotype, get_covars
 
-HEADERS = ["ID", "BETA", "T-STAT", "P-VALUE"]
+HEADERS = ["CHR", "SNP", "BP", "BETA", "STAT", "P"]
 
 def run_gwas(genotypes, phenotype, covars=None):
     """
@@ -24,7 +24,7 @@ def run_gwas(genotypes, phenotype, covars=None):
     coeffs, residuals, rank, _ = np.linalg.lstsq(X, y)
 
     if residuals.size == 0:
-        return np.nan, np.nan, np.nan
+        return [np.nan], [np.nan], [np.nan]
 
     effectSize = coeffs[1]
     dof = y.shape[0] - rank
@@ -99,7 +99,7 @@ def main():
     # load genotypes, phenotype, and covariates
     vcf = read_vcf(vcfName)
 
-    genotypes, ids = get_genotypes(vcf, maf)
+    genotypes, headers = get_genotypes(vcf, maf)
     phenotype = get_phenotype(vcf, phenName)
     covars = get_covars(vcf, covarName) if covarName else None
 
@@ -114,7 +114,7 @@ def main():
         index = 0
         for i in tqdm(range(genotypes.shape[1])):
             effectSize, tStat, pVal = run_gwas(genotypes[:, index:index+1], phenotype[:, 0:1], covars)
-            f.write(f"{ids[i]}\t{effectSize}\t{tStat}\t{pVal}\n")
+            f.write(f"{headers[i][0]}\t{headers[i][1]}\t{headers[i][2]}\t{effectSize[0]}\t{tStat[0]}\t{pVal[0]}\n")
             index += 1
 
 

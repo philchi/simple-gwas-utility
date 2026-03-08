@@ -2,7 +2,8 @@ data/1000G_chr1_pruned.vcf.gz
 data/gwas_large.vcf.gz
 data/gwas.eigenval
 gwas.vcf.gz
-output
+output/gwas_large_covar.assoc.linear
+output/gwas_large.assoc.linear
 .vscode
 .DS_Store
 test_space.ipynb
