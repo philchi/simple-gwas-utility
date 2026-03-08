@@ -1,7 +1,6 @@
 data/1000G_chr1_pruned.vcf.gz
 data/gwas_large.vcf.gz
 data/gwas.eigenval
-data/gwas.eigenvec
 gwas.vcf.gz
 output
 .vscode
