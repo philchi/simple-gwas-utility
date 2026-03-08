@@ -61,7 +61,7 @@ def parse_arguments():
         "--out",
         type=str,
         default="gwas_out",
-        help="Prefix for the output results files"
+        help="Prefix for the output result file"
     )
 
     processing_group = parser.add_argument_group("Processing/Filtering Options")
@@ -69,7 +69,7 @@ def parse_arguments():
     processing_group.add_argument(
         "--covar",
         type=str,
-        help="Path to plink eigenvec file from pca"
+        help="Path to the eigenvec file produced by plink pca"
     )
 
     processing_group.add_argument(

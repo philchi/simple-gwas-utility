@@ -20,6 +20,12 @@ against plink to compare their computational efficiency, memory usage, and accur
   - path to the vcf file
 - `--pheno` flag
   - path to the phenotype file
+- `--out` flag
+  - prefix for the output result file
+- `--covar` flag
+  - path to the eigenvec file produced by plink pca
+- `--maf` flag
+  - MAF threshold for filtering rare variants
 
 ## Next Steps
 
