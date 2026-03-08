@@ -1,7 +1,6 @@
 import argparse
 import os
 import numpy as np
-from cyvcf2 import VCF
 from tqdm import tqdm
 from scipy import stats
 from utils.vcf_utils import read_vcf, get_genotypes, get_phenotype, get_covars
