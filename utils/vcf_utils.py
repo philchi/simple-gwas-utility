@@ -5,15 +5,21 @@ import numpy as np
 def read_vcf(vcfName: str):
     return VCF(vcfName)
 
-def get_genotypes(vcf):
+def get_genotypes(vcf, mafHighPass):
     genotypeStack = []
+    ids = []
     
     try:
         print("Loading genotypes")
         for variant in tqdm(vcf):
             vcfGenotypes = variant.genotypes
             summedGenotypes = [genotype[0] + genotype[1] for genotype in vcfGenotypes]
-            genotypeStack.append(summedGenotypes)
+            p = np.sum(summedGenotypes) / (len(summedGenotypes) * 2)
+            maf = min(p, 1-p)
+
+            if maf >= mafHighPass:
+                genotypeStack.append(summedGenotypes)
+                ids.append(variant.ID)
         
         print("Done")
     except:
@@ -21,7 +27,7 @@ def get_genotypes(vcf):
 
     genotypes = np.array(genotypeStack).T
 
-    return genotypes
+    return genotypes, ids
 
 def get_phenotype(vcf, phen: str):
     with open(phen, "r") as f:
@@ -35,7 +41,7 @@ def get_phenotype(vcf, phen: str):
             continue
 
         cols = row.split("\t")
-        sampleMap[cols[0]] = np.float64(cols[2])
+        sampleMap[cols[0]] = np.float32(cols[2])
 
     samples = vcf.samples
     phenotype = np.expand_dims(np.array([sampleMap.get(sample, 0) for sample in samples]), axis=1)
@@ -49,12 +55,12 @@ def get_covars(vcf, eigenvecName: str):
             vals = line.split(" ")
 
             sampleName = vals[0]
-            covar = vals[2:5]
+            covar = vals[2:]
 
             sampleMap[sampleName] = covar
 
     samples = vcf.samples
-    covars = np.array([sampleMap.get(sample, 0) for sample in samples], dtype=np.float64)
+    covars = np.array([sampleMap.get(sample, 0) for sample in samples], dtype=np.float32)
 
     return covars
 

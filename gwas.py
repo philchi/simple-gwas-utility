@@ -6,6 +6,8 @@ from tqdm import tqdm
 from scipy import stats
 from utils.vcf_utils import read_vcf, get_genotypes, get_phenotype, get_covars
 
+HEADERS = ["ID", "BETA", "T-STAT", "P-VALUE"]
+
 def run_gwas(genotypes, phenotype, covars=None):
     """
     genotypes: (num samples x 1)
@@ -28,7 +30,7 @@ def run_gwas(genotypes, phenotype, covars=None):
     dof = y.shape[0] - rank
 
     mse = residuals[0] / dof
-    effectSizeVar = mse * (np.linalg.inv(X.T @ X)[1,1])
+    effectSizeVar = mse * (np.linalg.pinv(X.T @ X)[1,1])
     coeffStdErr = np.sqrt(effectSizeVar)
     
     tStat = effectSize / coeffStdErr
@@ -73,7 +75,8 @@ def parse_arguments():
 
     processing_group.add_argument(
         "--maf",
-        type=str,
+        type=float,
+        default=0,
         help="MAF threshold for filtering rare variants"
     )
 
@@ -93,9 +96,10 @@ def main():
     covarName = args.covar
     maf = args.maf
 
+    # load genotypes, phenotype, and covariates
     vcf = read_vcf(vcfName)
 
-    genotypes = get_genotypes(vcf)
+    genotypes, ids = get_genotypes(vcf, maf)
     phenotype = get_phenotype(vcf, phenName)
     covars = get_covars(vcf, covarName) if covarName else None
 
@@ -103,13 +107,16 @@ def main():
 
     os.makedirs("output", exist_ok=True)
 
+    # run gwas
     with open(f"output/{outName}", "w+") as f:
+        f.write("\t".join(HEADERS)+"\n")
+        
         index = 0
-        for _ in tqdm(range(genotypes.shape[1])):
+        for i in tqdm(range(genotypes.shape[1])):
             effectSize, tStat, pVal = run_gwas(genotypes[:, index:index+1], phenotype[:, 0:1], covars)
-            f.write(f"effect size: {effectSize}, t-stat: {tStat}, p value: {pVal}\n")
+            f.write(f"{ids[i]}\t{effectSize}\t{tStat}\t{pVal}\n")
             index += 1
-    
+
 
 if __name__ == "__main__":
     main()
