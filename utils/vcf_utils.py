@@ -13,15 +13,13 @@ def get_genotypes(vcf, mafHighPass):
         print("Loading genotypes")
         for variant in tqdm(vcf):
             vcfGenotypes = variant.genotypes
-            summedGenotypes = [min(2, val) for val in variant.gt_types]#[genotype[0] + genotype[1] for genotype in vcfGenotypes]
+            summedGenotypes = [min(2, val) for val in variant.gt_types]
             p = np.sum(summedGenotypes) / (len(summedGenotypes) * 2)
 
             if p > 0.5:
                 summedGenotypes = [2 - val for val in summedGenotypes]
 
             maf = min(p, 1-p)
-            if maf < mafHighPass:
-                print(f"id: {variant.ID}, negative maf? {maf}, p {p}, genotypes: {vcfGenotypes}")
 
             if maf >= mafHighPass:
                 genotypeStack.append(summedGenotypes)
